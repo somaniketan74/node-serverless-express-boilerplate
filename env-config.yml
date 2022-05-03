@@ -1,0 +1,9 @@
+offline:
+  REGION: "ap-south-1"
+  USER_POOL_ID: "ap-south-1_chdc3Eywy"
+dev:
+  REGION: "ap-south-1"
+  USER_POOL_ID: "ap-south-1_chdc3Eywy"
+prod:
+  REGION: "ap-south-1"
+  USER_POOL_ID: "ap-south-1_chdc3Eywy"

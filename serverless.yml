@@ -1,0 +1,41 @@
+service: apex-api
+variablesResolutionMode: 20210326
+
+custom:
+  # Our stage is based on what is passed in when running serverless
+  # commands. Or falls back to what we have set in the provider section.
+  stage: ${opt:stage, 'offline'}
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+  serverless-offline:
+    httpPort: 4000
+    noPrependStageInUrl: true
+  mongodb: ${ssm:/aws/reference/secretsmanager/dev/apex-api/mongodb, null}
+
+provider:
+  name: aws
+  region: ${file(./env-config.yml):${opt:stage}.REGION}
+  runtime: nodejs14.x
+  memorySize: 512
+  lambdaHashingVersion: 20201221 # https://www.serverless.com/framework/docs/deprecations/#LAMBDA_HASHING_VERSION_V2
+  role: arn:aws:iam::567023918999:role/apex-api-lambda-role
+  #role: arn:aws:iam::801704342874:role/app-lambda-role // personal account
+  environment:
+    MONGOURI: ${self:custom.mongodb.MONGOURI, 'mongodb://localhost:27017/apex'}
+    USER_POOL_ID: ${file(./env-config.yml):${opt:stage}.USER_POOL_ID, ''}
+    REGION: ${file(./env-config.yml):${opt:stage}.REGION, ''}
+
+functions:
+  app:
+    handler: src/index.handler
+    events:
+      - http: ANY /
+      - http: 'ANY /{proxy+}'
+
+package:
+  individually: true
+
+plugins:
+  - serverless-webpack
+  - serverless-offline
